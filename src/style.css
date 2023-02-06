@@ -1,0 +1,50 @@
+
+.row {
+  border: solid 1px; 
+  margin: 0.2vh;   
+} 
+
+.project-folder {
+  background-color: red;
+  margin-bottom: 2vh;
+  width: 90vw;
+}
+
+.project-folder > .folder-header {
+  text-align: center;  
+} 
+
+
+
+.project-item {
+  background-color: cyan;
+}
+
+.project-item-property {
+  background-color: aliceblue;
+}
+
+
+button {
+  margin: 1px;
+  overflow: hidden;
+}
+
+button:hover {
+  cursor: pointer;
+}
+.open-close-button {
+  width: 89vw;
+  background: none;
+  text-align: left;
+}
+
+.project-item > .folder-header > .open-close-button {
+  width: 70vw; 
+}
+
+.checklist {
+  background: none;
+  position: relative;
+  margin-left: 4vw;
+}
