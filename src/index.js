@@ -38,7 +38,7 @@ function input() {
 
   projIndex.push(appLogic.addProject("Misc"));
   projIndex.push(appLogic.addProject("Work"));
-  projIndex.push(appLogic.addProject("Javascript")); 
+  projIndex.push(appLogic.addProject("Javascript"));
   
   projIndex[0].contents.push(appLogic.addToDoItem(
     'laundry',
@@ -66,7 +66,7 @@ function input() {
   return projIndex;
 };
 
-const projData = input();
+input();   
 
 const DOMTasks = (() => {
 
@@ -89,16 +89,13 @@ const DOMTasks = (() => {
     appContainer.appendChild(editBtnContainer);
   };
 
-  const showProjects = () => {
-    while (document.getElementById('projects-container').firstChild) {
-      document.getElementById('projects-container').removeChild(document.getElementById('projects-container').firstChild);
-    }
+  const showProjects = () => { 
+    const projData = appLogic.getProjectIndex();
     for (let i = 0; i < projData.length; i++) {
       const folder = document.createElement('div');
       folder.classList.add('row', 'project-folder');
       folder.name = projData[i].name;
       folder.id = `proj-${projData[i].name}`;
-      folder.style.display = "block";
       document.getElementById('projects-container').appendChild(folder);
       const foldHeader = document.createElement('div');
       foldHeader.classList.add('folder-header');
@@ -129,6 +126,8 @@ const DOMTasks = (() => {
         }
       }
     }
+    DOMTasks.openCloseFolder();
+    DOMTasks.getChecklists();
   };
 
   const openCloseFolder = () => {
@@ -182,14 +181,14 @@ const DOMTasks = (() => {
     document.getElementById('app-header').appendChild(addBtn);
     addBtn.textContent = "New List";
     addBtn.addEventListener('click', () => {
-      DOMTasks.getFormNewFolder();
+      if (!document.getElementById('new-folder-form-container')) DOMTasks.getFormNewFolder();
     });
   };
 
   const getFormNewFolder = () => {
     const folders = Array.from(document.getElementsByClassName('project-folder'));
     folders.forEach(folder => {
-      folder.style.display = "none";
+      folder.remove();   
     });
 
     const formContainer = document.createElement('div');
@@ -211,6 +210,7 @@ const DOMTasks = (() => {
     nameInput.setAttribute('name','new-project-name');
     nameInput.setAttribute('type','text');
     nameInput.setAttribute('value','');  
+    nameInput.setAttribute('required','');  
     newForm.appendChild(nameLabel);
     newForm.appendChild(nameInput);
     const submit = document.createElement('input');
@@ -223,8 +223,8 @@ const DOMTasks = (() => {
     form.onsubmit = function (e) {
       e.preventDefault();
       appLogic.getProjectIndex().push(appLogic.addProject(document.form.name.value));
-      formContainer.remove(); 
-      DOMTasks.showProjects();  
+      formContainer.remove();
+      DOMTasks.showProjects(); 
     };
   };
 
@@ -234,8 +234,66 @@ const DOMTasks = (() => {
     document.getElementById('app-header').appendChild(dltBtn);
     dltBtn.textContent = "Delete List";
     dltBtn.addEventListener('click', () => {
-      appLogic.dltList();
+      if (!document.getElementById('dlt-folder-form-container')) DOMTasks.getFormDltFolder();
     });
+  };
+
+  const getFormDltFolder = () => {
+    const folders = Array.from(document.getElementsByClassName('project-folder'));
+    folders.forEach(folder => {
+      folder.remove();   
+    });
+
+    const formContainer = document.createElement('div');
+    formContainer.setAttribute('id','dlt-folder-form-container'); 
+    document.getElementById('app-container').appendChild(formContainer);
+    const newForm = document.createElement('form');
+    newForm.setAttribute('name','form');
+    newForm.setAttribute('method','GET');
+    formContainer.appendChild(newForm);
+    const formTitle = document.createElement('p');
+    formTitle.textContent = "Delete Project";
+    newForm.appendChild(formTitle);
+    const nameLabel = document.createElement('label');
+    nameLabel.classList.add('form-label');
+    nameLabel.textContent = "Project name:"; 
+    const nameInput = document.createElement('input');
+    nameInput.classList.add('form-input');
+    nameInput.setAttribute('id','name');
+    nameInput.setAttribute('name','dlt-project-name');
+    nameInput.setAttribute('list','projects');
+ 
+    const datalist = document.createElement('datalist');
+    datalist.setAttribute('id','projects');
+
+
+    newForm.appendChild(nameLabel);
+    newForm.appendChild(nameInput);
+    newForm.appendChild(datalist);
+    
+    //creates a dropdown list with all existing folders
+    const index = appLogic.getProjectIndex();
+    index.forEach(proj => {
+      const option = document.createElement('option');
+      option.innerHTML = proj.name;
+      datalist.appendChild(option);
+    });
+
+    const submit = document.createElement('input');
+    submit.setAttribute('id','submit');
+    submit.setAttribute('type','submit');
+    submit.setAttribute('value','Confirm'); 
+    newForm.appendChild(submit);
+
+    const form = document.forms['form'];
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      for (let i = 0; i < index.length; i++) {
+        if (document.form.name.value === index[i].name) index.splice(i, 1);
+      }
+      formContainer.remove();
+      DOMTasks.showProjects(); 
+    };
   };
 
   const getFormNewItem = () => {
@@ -290,6 +348,7 @@ const DOMTasks = (() => {
     getAddFolderButton,
     getFormNewFolder,
     getDeleteFolderButton,
+    getFormDltFolder,
     getFormNewItem,
     /*getAddItemButton,
     getDeleteItemButton*/
@@ -304,7 +363,5 @@ function getInitialCase(string) {
 //to be bundled in its own startup function
 DOMTasks.getAppContainer();
 DOMTasks.showProjects();
-DOMTasks.openCloseFolder();
-DOMTasks.getChecklists();
 DOMTasks.getAddFolderButton();
-DOMTasks.getDeleteFolderButton(); 
+DOMTasks.getDeleteFolderButton();
